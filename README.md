@@ -9,6 +9,7 @@ The utility will for a given set of tables read the source schema, drop and crea
 
 ##How to use##
 1. edit the given cfg, or create new ones. You can list as many tables as you like!
+
 [rsqoop]
 tables=public.Campaign public.CampaignHistory public.Locations public.Users
 target_schema=staging
