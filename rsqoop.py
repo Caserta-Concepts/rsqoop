@@ -6,6 +6,7 @@ import logging
 
 #-------------------------------------------------------------------------------------
 #tiny logging wrapper:
+
 log_name = datetime.now().strftime("rsqoop-%Y%m%d-%H%M%S.log")
 logging.basicConfig(filename=log_name,level=logging.DEBUG, format='%(asctime)s %(message)s',filmode='w')
 
@@ -14,7 +15,8 @@ def log(message):
     print(message)
 
 #-------------------------------------------------------------------------------------
-#create a crude mapping table for pg and rs datatimes
+#create a crude mapping table for pg and rs datatypes
+
 dt_map = {}
 dt_map['character']= 'char'
 dt_map['double precision']=  'float'
@@ -32,6 +34,8 @@ dt_map['text'] = 'varchar(2000)'
 
 #-------------------------------------------------------------------------------------
 #drop table:
+
+
 def drop_table (schema, table_name):
 
     del_sql = 'drop table ' + schema + '.' + table_name
@@ -45,6 +49,8 @@ def drop_table (schema, table_name):
 
 #-------------------------------------------------------------------------------------
 #create table:
+
+
 def create_table_from(src_schema, src_table, target_schema, target_table):
 
     schema_sql = """
@@ -69,6 +75,8 @@ def create_table_from(src_schema, src_table, target_schema, target_table):
 
 #-------------------------------------------------------------------------------------
 #load table:
+
+
 def load_table (src_schema, src_table, target_schema, target_table):
 
     pg_cur.execute("SELECT *, now() as etl_date from " + src_schema + '.' + src_table)
@@ -85,17 +93,44 @@ def load_table (src_schema, src_table, target_schema, target_table):
 
     for row in pg_rs:
         insert_sql += "%s,"
+
     insert_sql_batch = rs_cur.mogrify(insert_sql, pg_rs)
 
     rs_cur.execute(insert_sql_batch[:-1])
-
     rs_conn.commit()
+
+
+#-------------------------------------------------------------------------------------
+#tune table:
+
+
+def tune_table (schema, table):
+
+    #note vac can not be run inside of transaction!
+    old_isolation_level = rs_conn.isolation_level
+    rs_conn.set_isolation_level(0)
+
+    tune_me = schema +  '.' + table
+
+    vac_sql = 'vacuum ' + tune_me
+    analyze_sql = 'analyze ' + tune_me
+
+    rs_cur.execute(vac_sql)
+    rs_cur.execute(analyze_sql)
+
+    #set back to old isolation
+    rs_conn.set_isolation_level(old_isolation_level)
+
+#-------------------------------------------------------------------------------------
+#main:
 
 if __name__ == "__main__":
 
     log('rsqoop start: '+ str(datetime.now()))
+
     #-------------------------------------------------------------------------------------
     #arg parse
+
     parser = argparse.ArgumentParser(add_help=False)
     parser.add_argument("-h", "--help", action='help', help='command line utility for scooping data into Redshift from PG')
     parser.add_argument("-c", "--config",  help='specify a config, otherwise i will use rsqoop.cfg', default='rsqoop.cfg')
@@ -136,6 +171,7 @@ if __name__ == "__main__":
 
     #-------------------------------------------------------------------------------------
     #main logic
+
     table_list=tables.split(' ')
 
     for src_table in table_list:
@@ -160,5 +196,8 @@ if __name__ == "__main__":
 
         load_table(src_schema, src_table_name, target_schema, rs_table)
         log('target loaded: ' + str(datetime.now()))
+
+        tune_table(target_schema, rs_table)
+        log('tuning complete: ' + str(datetime.now()))
 
     log('-----\ndone!: ' + str(datetime.now()))
