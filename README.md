@@ -9,25 +9,7 @@ The utility will for a given set of tables read the source schema, drop and crea
 
 ##How to use##
 1. edit the given cfg, or create new ones. You can list as many tables as you like!
-
-[rsqoop]
-tables=public.Campaign public.CampaignHistory public.Locations public.Users
-target_schema=staging
-target_prefix=m1
-
-[redshift]
-db_name=edw
-user=admin
-host=somescluster.redshift.amazonaws.com
-password=password
-
-[pg]
-db_name=myapp
-user=user
-host=pg_prod
-password=password
-
-2.  run the utility `python rsqoop.py` or `python rsqoop.py -c rsqoop_user_data.cfg`
+2.  run the utility `python rsqoop.py` or `python rsqoop.py -c rsqoop_user_data.cfg` (assuming you are using multiple configs).
 
 THATS IT!
 
