@@ -4,7 +4,7 @@ rsqoop
 
 Sqoop-like utility for loading relational tables to Redshift
 
-Creating ETL jobs for staging is a drag.  Essentially this utility helps from making a bunch of boilerplate ETL jobs.  Rsqoop does a kill and fill load of list of reference tables in Redshift from Postgres (cool if you are Postgres users, feel free to adapt to others).  
+Creating ETL jobs for staging is a drag.  Essentially this utility helps prevent you from making a bunch of boilerplate ETL jobs.  Rsqoop does a kill and fill load of list of reference tables in Redshift from Postgres (cool if you are Postgres users, feel free to adapt to others).  
 
 The utility will for a given set of tables:
 1. read the source schema
