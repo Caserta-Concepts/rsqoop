@@ -44,6 +44,9 @@ def drop_table (schema, table_name):
         rs_cur.execute(del_sql, table_name)
     except:
         log( "table does not exist - no worries mate!")
+        rs_conn.rollback()
+        return
+
     else:
         rs_conn.commit()
 
